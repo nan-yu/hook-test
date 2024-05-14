@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: signature-verification
+  annotations:
+    configsync.gke.io/hook-phase: PreSync
+spec:
+  template:
+  spec:
+    containers:
+    - name: oci-signature-verification
+      image: us-docker.pkg.dev/nanyu-gke-dev/test/cosign:v0.0.1
+      command:
+        - "cosign"
+        - "verify"
+        - "--key"
+        - "</path/to/mounted/public/key>"
+        - "<oci-config-image-url>"
+      volumeMounts:
+      - mountPath: /etc/cosign.pub
+        name: public-key
+        readOnly: true
+    restartPolicy: never
+    volumes:
+    - name: public-key
+      secret:
+        secretName: public-key
+    serviceAccountName: root-reconciler
