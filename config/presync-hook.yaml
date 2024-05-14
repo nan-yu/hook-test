@@ -14,8 +14,8 @@ spec:
         - "cosign"
         - "verify"
         - "--key"
-        - "</path/to/mounted/public/key>"
-        - "<oci-config-image-url>"
+        - "/etc/cosign.pub"
+        - "us-docker.pkg.dev/nanyu-gke-dev/configsync-ci/kustomize-components:latest"
       volumeMounts:
       - mountPath: /etc/cosign.pub
         name: public-key
