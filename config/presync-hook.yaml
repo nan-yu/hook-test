@@ -16,7 +16,7 @@ spec:
         - -c
         - |
             cosign login us-docker.pkg.dev -u oauth2accesstoken -p "$(gcloud auth print-access-token)"
-            cosign verify --key "/etc/public-key/cosign.pub" us-docker.pkg.dev/nanyu-gke-dev/configsync-ci/kustomize-components:latest
+            cosign verify --key "/etc/public-key/cosign.pub" us-docker.pkg.dev/nanyu-gke-dev/test/hook-test:v1
         env:
         - name: HOME
           value: /tmp
