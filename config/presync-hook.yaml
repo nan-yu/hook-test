@@ -2,27 +2,30 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: signature-verification
+  namespace: config-management-system
   annotations:
     configsync.gke.io/hook-phase: PreSync
 spec:
   template:
-  spec:
-    containers:
-    - name: oci-signature-verification
-      image: us-docker.pkg.dev/nanyu-gke-dev/test/cosign:v0.0.1
-      command:
-        - "cosign"
-        - "verify"
-        - "--key"
-        - "/etc/cosign.pub"
-        - "us-docker.pkg.dev/nanyu-gke-dev/configsync-ci/kustomize-components:latest"
-      volumeMounts:
-      - mountPath: /etc/cosign.pub
-        name: public-key
-        readOnly: true
-    restartPolicy: never
-    volumes:
-    - name: public-key
-      secret:
-        secretName: public-key
-    serviceAccountName: root-reconciler
+    spec:
+      containers:
+      - name: oci-signature-verification
+        image: us-docker.pkg.dev/nanyu-gke-dev/test/cosign:v0.0.2
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+            cosign login us-docker.pkg.dev -u oauth2accesstoken -p "$(gcloud auth print-access-token)"
+            cosign verify --key "/etc/public-key/cosign.pub" us-docker.pkg.dev/nanyu-gke-dev/configsync-ci/kustomize-components:latest
+        env:
+        - name: HOME
+          value: /tmp
+        volumeMounts:
+        - mountPath: /etc/public-key
+          name: public-key
+          readOnly: true
+      restartPolicy: Never
+      volumes:
+      - name: public-key
+        secret:
+          secretName: cosign-public-key
